@@ -1,0 +1,147 @@
+/* Estilo general */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* Encabezados */
+h1 {
+    color: #343a40;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Enlace principal */
+a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+a:hover {
+    color: #0056b3;
+}
+
+/* Contenedor del formulario */
+.card {
+    width: 100%;
+    max-width: 500px; /* Máximo ancho para el formulario */
+    margin: 0 auto;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    background-color: white;
+}
+
+/* Campos del formulario */
+form input.form-control {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* Botón del formulario */
+button {
+    background-color: #007bff;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Enlace de retroceso */
+a.btn-success {
+    display: inline-block;
+    width: 100%; /* Botón verde ocupa todo el ancho */
+    text-align: center;
+    margin-top: 10px;
+    padding: 10px 15px;
+    background-color: #28a745;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+a.btn-success:hover {
+    background-color: #218838;
+}
+
+
+/* Tabla de lista de plantas */
+.table {
+    width: 100%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.table th, .table td {
+    padding: 15px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.table th {
+    background-color: #007bff;
+    color: white;
+}
+
+.table td {
+    background-color: #f9f9f9;
+}
+
+.table a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.table a:hover {
+    color: #0056b3;
+}
+
+/* Contenedor para detalles de planta */
+.details-card {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+.details-card p {
+    margin: 10px 0;
+    font-size: 1.1rem;
+    color: #343a40;
+}
+
+.details-card a {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    text-align: center;
+}
+
+.details-card a:hover {
+    background-color: #0056b3;
+}

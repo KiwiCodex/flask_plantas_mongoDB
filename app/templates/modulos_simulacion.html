@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Simulación de {{ modulo.nombre }}{% endblock %}
+
+{% block content %}
+<h1 class="text-center">Simulación del Módulo: {{ modulo.nombre }}</h1>
+<h2 class="text-center">Planta: {{ modulo.planta.especie }}</h2>
+
+<div class="state-container text-center">
+    <div class="box {{ estado_color }}" id="estado-planta">
+        <span class="emoji">{{ globo[0] }}</span>
+        <span class="texto">{{ globo[1] }}</span>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <table class="table table-bordered text-center">
+        <thead class="table-dark">
+            <tr>
+                <th>Rango Ideal</th>
+                <th>Valor Actual</th>
+                <th>Condición</th>
+                <th>Estado</th>
+                <th>Estabilizar</th>
+            </tr>
+        </thead>
+        <tbody id="tabla-simulacion">
+            {% for nombre, valor in valores_simulados.items() %}
+            <tr>
+                <td>
+                    <span class="rango">{{ rangos_dict[nombre]["min"] | round(1) }} - {{ rangos_dict[nombre]["max"] | round(1) }}</span>
+                    {{ rangos_dict[nombre].get("unidad", "Sin unidad") }} ({{ nombre }})
+                </td>
+                <td>
+                    <strong class="valor">{{ valor | round(1) }}</strong>
+                    {{ rangos_dict[nombre].get("unidad", "Sin unidad") }}
+                </td>
+                <td class="estado" id="estado-{{ nombre }}" data-min="{{ rangos_dict[nombre]['min'] }}" data-max="{{ rangos_dict[nombre]['max'] }}">
+                    {% set dif_min = rangos_dict[nombre]["min"] - valor %}
+                    {% set dif_max = valor - rangos_dict[nombre]["max"] %}
+                    {% if valor >= rangos_dict[nombre]["min"] and valor <= rangos_dict[nombre]["max"] %}
+                        🟢 Dentro del rango ideal
+                    {% elif valor < rangos_dict[nombre]["min"] and dif_min <= 4 %}
+                        🟡 Falta de {{ nombre }} -{{ dif_min | round(1) }}
+                    {% elif valor < rangos_dict[nombre]["min"] and dif_min > 4 and dif_min <= 9 %}
+                        🟠 Falta de {{ nombre }} -{{ dif_min | round(1) }}
+                    {% elif valor < rangos_dict[nombre]["min"] and dif_min >= 10 %}
+                        🔴 Falta de {{ nombre }} -{{ dif_min | round(1) }}
+                    {% elif valor > rangos_dict[nombre]["max"] and dif_max <= 4 %}
+                        🟡 Exceso de {{ nombre }} +{{ dif_max | round(1) }}
+                    {% elif valor > rangos_dict[nombre]["max"] and dif_max > 4 and dif_max <= 9 %}
+                        🟠 Exceso de {{ nombre }} +{{ dif_max | round(1) }}
+                    {% elif valor > rangos_dict[nombre]["max"] and dif_max >= 10 %}
+                        🔴 Exceso de {{ nombre }} +{{ dif_max | round(1) }}
+                    {% endif %}
+                </td>
+                <td class="alerta" id="alerta-{{ nombre }}">
+                    {% if scores[nombre] == 0 %}
+                      ✅ Ok (0)
+                    {% elif scores[nombre] == 1 %}
+                      ⚠️ Alerta (+1)
+                    {% elif scores[nombre] == 2 %}
+                      ⚠️ Alerta (+2)
+                    {% elif scores[nombre] == 3 %}
+                      ⚠️ Precaución (+3)
+                    {% endif %}
+                </td>
+                <td>
+                    <!-- Botón para estabilizar (fijar un valor aleatorio dentro del rango ideal) -->
+                    <button class="btn btn-sm btn-info btn-estabilizar" data-variable="{{ nombre }}">Estabilizar</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>        
+    </table>
+</div>
+
+<div class="d-flex justify-content-center mt-4">
+    <button id="btn-simular" class="btn btn-primary" data-modulo-id="{{ modulo.id }}">Generar Nuevos Valores</button>
+    <a href="{{ url_for('main.index') }}" class="btn btn-secondary ms-2">Volver al Inicio</a>
+</div>
+
+<div class="text-center text-secondary mt-3">
+    <p>😊 Todo Bien: 0 puntos</p>
+    <p>😐 En cuidado: 1-2 puntos</p>
+    <p>😟 Preocupado: 3-5 puntos</p>
+    <p>😭 Necesito ayuda: +5 puntos </p>
+</div>
+
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/simulacion.js') }}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("btn-simular").setAttribute("data-modulo-id", "{{ modulo.id }}");
+        });
+    </script>
+{% endblock %}
+
+{% endblock %}

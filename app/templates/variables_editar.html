@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Variable{% endblock %}
+
+{% block content %}
+
+    <div class="container mt-5">
+        <h1>Editar Unidad de Medida</h1>
+        <hr>
+
+        <!-- Mensajes Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('main.variables_editar', id=variable.id) }}" method="POST">
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" value="{{ variable.nombre }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="abreviatura" class="form-label">Abreviatura</label>
+                <input type="text" class="form-control" id="abreviatura" name="abreviatura" value="{{ variable.unidad_medida }}" required>
+            </div>
+
+            <button type="submit" class="btn btn-success">Actualizar</button>
+            <a href="{{ url_for('main.variables_lista') }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+    
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Crear Planta{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center">Crear Planta</h1>
+    <hr>
+    <form method="POST" action="{{ url_for('main.plantas_crear') }}">
+        <div class="mb-3">
+            <label for="especie" class="form-label">Especie</label>
+            <input type="text" class="form-control" id="especie" name="especie" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="fecha_plantado" class="form-label">Fecha de Plantado</label>
+            <input type="date" class="form-control" id="fecha_plantado" name="fecha_plantado">
+        </div>
+
+        <div class="mb-3">
+            <label for="fecha_cosecha" class="form-label">Fecha de Cosecha</label>
+            <input type="date" class="form-control" id="fecha_cosecha" name="fecha_cosecha">
+        </div>
+
+        <h3>Rangos</h3>
+
+        <div class="mb-3">
+            <label for="temperatura_min" class="form-label">Temperatura</label>
+            <div class="input-group">
+                <input type="number" class="form-control" id="temperatura_min" name="temperatura_min" step="0.1" placeholder="Temperatura Mínima" required>
+                <input type="number" class="form-control" id="temperatura_max" name="temperatura_max" step="0.1" placeholder="Temperatura Máxima" required>
+                <select class="form-control" id="variable_temp" name="variable_temp" >
+                    {% for variable in variables %}
+                        <option value="{{ variable.id }}">{{ variable.unidad_medida }} - {{ variable.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="ph_min" class="form-label">pH</label>
+            <div class="input-group">
+                <input type="number" class="form-control" id="ph_min" name="ph_min" step="0.1" min="0" max="14" placeholder="pH Mínimo" required>
+                <input type="number" class="form-control" id="ph_max" name="ph_max" step="0.1" min="0" max="14" placeholder="pH Máximo" required>
+                <select class="form-control" id="variable_ph" name="variable_ph">
+                    {% for variable in variables %}
+                        <option value="{{ variable.id }}">{{ variable.unidad_medida }} - {{ variable.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="humedad_min" class="form-label">Humedad</label>
+            <div class="input-group">
+                <input type="number" class="form-control" id="humedad_min" name="humedad_min" placeholder="Humedad Mínima" required>
+                <input type="number" class="form-control" id="humedad_max" name="humedad_max" placeholder="Humedad Máxima"required>
+                <select class="form-control" id="variable_humedad" name="variable_humedad">
+                    {% for variable in variables %}
+                        <option value="{{ variable.id }}">{{ variable.unidad_medida }} - {{ variable.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Crear Planta</button>
+        <a href="{{ url_for('main.plantas_lista') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+{% block scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Validación de fechas
+        const fechaPlantado = document.getElementById("fecha_plantado");
+        const fechaCosecha = document.getElementById("fecha_cosecha");
+
+        fechaPlantado.addEventListener("change", function () {
+            if (fechaPlantado.value) {
+                let minFechaCosecha = new Date(fechaPlantado.value);
+                minFechaCosecha.setDate(minFechaCosecha.getDate() + 1);
+                fechaCosecha.min = minFechaCosecha.toISOString().split("T")[0];
+
+                if (fechaCosecha.value && fechaCosecha.value <= fechaPlantado.value) {
+                    fechaCosecha.value = "";
+                }
+            }
+        });
+
+        // Función para validar rangos
+        function validarRangos(minInput, maxInput) {
+            minInput.addEventListener("input", function () {
+                maxInput.min = minInput.value;
+            });
+
+            maxInput.addEventListener("blur", function () {
+                let minVal = parseFloat(minInput.value);
+                let maxVal = parseFloat(maxInput.value);
+
+                if (!isNaN(minVal) && (!maxVal || maxVal <= minVal)) {
+                    maxInput.value = (minVal + 0.1).toFixed(1);
+                }
+            });
+        }
+
+        // Función para seleccionar la variable por defecto según la unidad de medida
+        function seleccionarVariable(selectElement, unidad) {
+            let opciones = selectElement.options;
+            for (let i = 0; i < opciones.length; i++) {
+                if (opciones[i].text.includes(unidad)) {
+                    selectElement.value = opciones[i].value;
+                    break;
+                }
+            }
+        }
+
+        // Aplicar selección automática a cada campo
+        seleccionarVariable(document.getElementById("variable_temp"), "°C");
+        seleccionarVariable(document.getElementById("variable_ph"), "pH");
+        seleccionarVariable(document.getElementById("variable_humedad"), "%");
+
+        // Validación de rangos numéricos
+        validarRangos(document.getElementById("temperatura_min"), document.getElementById("temperatura_max"));
+        validarRangos(document.getElementById("ph_min"), document.getElementById("ph_max"));
+        validarRangos(document.getElementById("humedad_min"), document.getElementById("humedad_max"));
+    });
+</script>
+{% endblock %}
+
+
+
+
+{% endblock %}

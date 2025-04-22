@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+
+    <div class="container mt-5">
+        <h1 class="text-center">Editar Escuela</h1>
+        <hr>
+
+        <!-- Mostrar mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('main.escuela_editar', id=escuela.id) }}" method="POST" class="mx-auto" style="max-width: 500px;">
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" value="{{ escuela.nombre }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="comuna" class="form-label">Comuna</label>
+                <input type="text" class="form-control" id="comuna" name="comuna" value="{{ escuela.comuna }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="director" class="form-label">Director</label>
+                <input type="text" class="form-control" id="director" name="director" value="{{ escuela.director }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="profesor" class="form-label">Profesor</label>
+                <input type="text" class="form-control" id="profesor" name="profesor" value="{{ escuela.profesor }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="curso" class="form-label">Curso</label>
+                <input type="text" class="form-control" id="curso" name="curso" value="{{ escuela.curso }}" required>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('main.escuela_lista') }}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-success">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+    {% endblock %}
+

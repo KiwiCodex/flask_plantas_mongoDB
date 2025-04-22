@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Lecturas almacenadas{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h1 class="text-center">Lecturas de Atmospheric Pressure</h1>
+  <hr>
+  <table id="tabla-lecturas" class="table table-striped text-center">
+    <thead class="table-dark">
+      <tr>
+        <th>Fecha y Hora</th>
+        <th>Valor</th>
+        <th>Precisión</th>
+        <th>Sensor</th>
+        <th>Dataloger</th>
+        <th>Planta</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for medicion in readings %}
+      <tr>
+        <td>{{ medicion.datetime.strftime("%Y-%m-%d %H:%M:%S") if medicion.datetime else "" }}</td>
+        <td>{{ medicion.value }}</td>
+        <td>{{ medicion.precision }}</td>
+        <td>{{ medicion.sensor_type }}</td>
+        <td>{{ medicion.id_dataloger }}</td>
+        <td>{{ medicion.id_planta }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<!-- Incluye DataTables -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"/>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script>
+$(document).ready(function(){
+    $('#tabla-lecturas').DataTable({
+        "pageLength": 10,
+        "language": {
+            "search": "Buscar:",
+            "lengthMenu": "Mostrar _MENU_ registros por página",
+            "zeroRecords": "No se encontraron registros",
+            "info": "Mostrando página _PAGE_ de _PAGES_",
+            "infoEmpty": "No hay registros disponibles",
+            "infoFiltered": "(filtrado de _MAX_ registros totales)",
+            "paginate": {
+                "first": "Primero",
+                "last": "Último",
+                "next": "Siguiente",
+                "previous": "Anterior"
+            }
+        },
+        "dom": '<"top"f<"dt-add">>rt<"bottom"lp><"clear">',
+          "initComplete": function(settings, json) {
+              $("div.dt-add").html('<a href="{{ url_for("main.mediciones_descargar") }}" class="btn btn-primary">Descargar</a>');
+          }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Módulo Escolar{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center">Editar Módulo Escolar</h1>
+    <hr>
+    <form method="POST" action="{{ url_for('main.modulos_editar', id=modulo.id) }}">
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" value="{{ modulo.nombre }}" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="ubicacion" class="form-label">Ubicación</label>
+            <input type="text" class="form-control" id="ubicacion" name="ubicacion" value="{{ modulo.ubicacion }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="escuela" class="form-label">Escuela</label>
+            <select class="form-control" id="escuela" name="escuela" required>
+                {% for escuela in escuelas %}
+                    <option value="{{ escuela.id }}" data-coordenadas="{{ escuela.coordenadas }}"
+                        {% if escuela.id == modulo.id_escuela %}selected{% endif %}>
+                        {{ escuela.nombre }} - Profesor: {{ escuela.profesor }} - Curso: {{ escuela.curso }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+
+        <div class="mb-3">
+            <label for="coordenadas" class="form-label">Coordenadas</label>
+            <input type="text" class="form-control" id="coordenadas" name="coordenadas" value="{{ coordenadas_wkt[6:-1] if coordenadas_wkt else '' }}">
+        </div>
+        
+
+
+        <div class="mb-3">
+            <label for="dataloger" class="form-label">Dataloger</label>
+            <select class="form-control" id="dataloger" name="dataloger" required>
+                {% for dataloger in datalogers %}
+                    <option value="{{ dataloger.id }}" {% if dataloger.id == modulo.id_dataloger %}selected{% endif %}>{{ dataloger.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="planta" class="form-label">Planta</label>
+            <select class="form-control" id="planta" name="planta" required>
+                {% for planta in plantas %}
+                    <option value="{{ planta.id }}" {% if planta.id == modulo.id_planta %}selected{% endif %}>{{ planta.especie }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+{% block scripts %}
+
+<script>
+    document.getElementById('escuela').addEventListener('change', function() {
+        var selectedOption = this.options[this.selectedIndex];
+        var coordenadas = selectedOption.getAttribute('data-coordenadas');
+    
+        if (coordenadas) {
+            // Extrae solo los valores de latitud y longitud
+            coordenadas = coordenadas.replace('POINT(', '').replace(')', '');
+        }
+    
+        document.getElementById('coordenadas').value = coordenadas || '';
+    });
+</script>
+{% endblock %}
+{% endblock %}

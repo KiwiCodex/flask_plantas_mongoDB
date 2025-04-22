@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Descargar Mediciones{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Descargar Mediciones</h1>
+    <hr>
+    <form method="POST" action="{{ url_for('main.mediciones_descargar') }}">
+        <div class="mb-3">
+            <label for="dataloger" class="form-label">Dataloger</label>
+            <select class="form-control" id="dataloger" name="dataloger" required>
+                <option value="" selected disabled>Seleccione un Dataloger</option>
+                {% for dataloger in datalogers %}
+                    <option value="{{ dataloger.id }}">{{ dataloger.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="planta" class="form-label">Planta</label>
+            <select class="form-control" id="planta" name="planta" required>
+                <option value="" selected disabled>Seleccione una Planta</option>
+                {% for planta in plantas %}
+                    <option value="{{ planta.id }}">{{ planta.especie }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="start_date" class="form-label">Fecha de Inicio</label>
+            <input type="datetime-local" class="form-control" id="start_date" name="start_date" required>
+        </div>
+        <div class="mb-3">
+            <label for="end_date" class="form-label">Fecha de Fin</label>
+            <input type="datetime-local" class="form-control" id="end_date" name="end_date" required>
+        </div>
+        <button type="submit" class="btn btn-success">Descargar Mediciones</button>
+    </form>
+</div>
+{% endblock %}

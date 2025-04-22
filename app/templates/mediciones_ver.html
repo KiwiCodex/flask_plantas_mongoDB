@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Ver Mediciones desde API{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h1 class="text-center">Datos Descargados de la API</h1>
+  <hr>
+  <pre>{{ data | tojson(indent=2) }}</pre>
+</div>
+{% endblock %}

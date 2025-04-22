@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación de {{ modulo.especie }}</title>
+    <link href="{{ url_for('static', filename='css/planta.css') }}" rel="stylesheet">
+</head>
+<body>
+    <h1>Modulo de: {{ modulo.especie }}</h1>
+
+    <div class="wrap">
+        <!-- Contenedor para el estado de la planta -->
+        <div class="state-container">
+            <div class="box {{ estado_color }}" id="estado-planta">
+                {% if estado_color == 'green' %} 😊 ¡Todo bien!
+                {% elif estado_color == 'yellow' %} 😐 En cuidado
+                {% elif estado_color == 'orange' %} 😟 Preocupado
+                {% else %} 😭 Necesito ayuda
+                {% endif %}
+            </div>
+        </div>
+    
+    </div>
+    
+    
+
+    <!-- Tabla de condiciones -->
+    <table id="tabla-condiciones">
+        <thead>
+            <tr>
+                <th>Condición</th>
+                <th>Valor Actual</th>
+                <th>Rango Ideal</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <tr>
+                    <td>Temperatura</td>
+                    <td>{{ valores_simulados.temperatura | round(1) }}°C</td>
+                    <td>{{ modulo.especie_rango.temperatura_min | round(1) }}°C - {{ modulo.especie_rango.temperatura_max | round(1) }}°C</td>
+                    <td>
+                        {% set temp_actual = valores_simulados.temperatura %}
+                        {% set temp_min = modulo.especie_rango.temperatura_min %}
+                        {% set temp_max = modulo.especie_rango.temperatura_max %}
+                        {% set dif_min = (temp_min - temp_actual) | round(1) %}
+                        {% set dif_max = (temp_actual - temp_max) | round(1) %}
+                        
+                        {% if temp_actual >= temp_min and temp_actual <= temp_max %}
+                            🟢 Dentro del rango ideal
+                        {% elif dif_max > 0 and dif_max <= 4 %}
+                            🟡 Exceso de temperatura +{{ dif_max }}°C
+                        {% elif dif_max > 4 and dif_max <= 9 %}
+                            🟠 Exceso de temperatura +{{ dif_max }}°C
+                        {% elif dif_max >= 10 %}
+                            🔴 Exceso de temperatura +{{ dif_max }}°C
+                        {% elif dif_min > 0 and dif_min <= 4 %}
+                            🟡 Falta de temperatura -{{ dif_min }}°C
+                        {% elif dif_min > 4 and dif_min <= 9 %}
+                            🟠 Falta de temperatura -{{ dif_min }}°C
+                        {% elif dif_min >= 10 %}
+                            🔴 Falta de temperatura -{{ dif_min }}°C
+                        {% endif %}
+                    </td>
+                </tr>                
+                
+                <tr>
+                    <td>pH</td>
+                    <td>{{ valores_simulados.ph | round(1) }}</td>
+                    <td>{{ modulo.especie_rango.ph_min | round(1) }} - {{ modulo.especie_rango.ph_max | round(1) }}</td>
+                    <td>
+                        {% set ph_actual = valores_simulados.ph %}
+                        {% set ph_min = modulo.especie_rango.ph_min %}
+                        {% set ph_max = modulo.especie_rango.ph_max %}
+                        {% set dif_min = (ph_min - ph_actual) | round(1) %}
+                        {% set dif_max = (ph_actual - ph_max) | round(1) %}
+                
+                        {% if ph_actual >= ph_min and ph_actual <= ph_max %}
+                            🟢 Dentro del rango ideal
+                        {% elif dif_max > 0 and dif_max <= 2 %}
+                            🟡 pH muy alcalino (+{{ dif_max }})
+                        {% elif dif_max > 2 and dif_max <= 5 %}
+                            🟠 pH demasiado alcalino (+{{ dif_max }})
+                        {% elif dif_max >= 6 %}
+                            🔴 pH extremadamente alcalino (+{{ dif_max }})
+                        {% elif dif_min > 0 and dif_min <= 2 %}
+                            🟡 pH muy ácido (-{{ dif_min }})
+                        {% elif dif_min > 2 and dif_min <= 5 %}
+                            🟠 pH demasiado ácido (-{{ dif_min }})
+                        {% elif dif_min >= 6 %}
+                            🔴 pH extremadamente ácido (-{{ dif_min }})
+                        {% endif %}
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td>Humedad</td>
+                    <td>{{ valores_simulados.humedad }}%</td>
+                    <td>{{ modulo.especie_rango.humedad_min }}% - {{ modulo.especie_rango.humedad_max }}%</td>
+                    <td>
+                        {% set humedad_actual = valores_simulados.humedad %}
+                        {% set humedad_min = modulo.especie_rango.humedad_min %}
+                        {% set humedad_max = modulo.especie_rango.humedad_max %}
+                        {% set dif_min = (humedad_min - humedad_actual) | abs %}
+                        {% set dif_max = (humedad_actual - humedad_max) | abs %}
+                        {% set dif = dif_min if humedad_actual < humedad_min else dif_max %}
+                
+                        {% if humedad_actual >= humedad_min and humedad_actual <= humedad_max %}
+                            🟢 Dentro del rango ideal
+                        {% elif dif > 0 and dif <= 10 %}
+                            🟡 Desviación de humedad ({{ dif }}%)
+                        {% elif dif > 10 and dif <= 20 %}
+                            🟠 Desviación significativa ({{ dif }}%)
+                        {% elif dif >= 21 %}
+                            🔴 Humedad fuera de rango ({{ dif }}%)
+                        {% endif %}
+                    </td>
+                </tr>
+                
+        </tbody>
+    </table>
+    
+
+    <!-- Botón para generar nuevos valores -->
+    <div class="button-container">
+        <button onclick="generarNuevosValores()">Generar Nuevos Valores</button>
+    </div>
+
+    <script>
+        function generarNuevosValores() {
+            location.href = "{{ url_for('main.simulate', id=modulo.id) }}";
+        }
+    </script>
+</body>
+</html>

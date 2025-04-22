@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+<h1 class="text-center">Lista de Módulos Escolares</h1>
+<p class="text-center text-secondary" >*Antes de ingresar módulos recuerde que debe tener <b>Plantas</b>, <b>Escuelas</b>, <b>Datalogers</b> y <b>Variables</b> ya almacenadas primero</p>
+
+<hr>
+
+
+{% if modulos %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+      <table id="tabla-escuelas" class="table table-striped text-center">
+        <thead class="table-dark">
+            <tr>
+                <th>Módulo</th>
+                <th>Planta</th>
+                <th>Escuela</th>
+                <th>Ubicación</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for modulo in modulos %}
+                <tr>
+                    <td>{{ modulo.nombre }}</td>
+                    <td>{{ modulo.planta.especie if modulo.planta else 'Sin planta asociada' }}</td>
+                    <td>{{ modulo.escuela.nombre if modulo.escuela else 'Sin escuela asociada' }}</td>
+                    <td> {{ modulo.ubicacion if modulo.ubicacion else "No disponible" }}</td>
+            
+                    <td>
+                        <a href="{{ url_for('main.modulos_simulacion', id=modulo.id) }}" class="btn btn-info btn-sm">Simulación</a>
+                        <a href="{{ url_for('main.modulos_editar', id=modulo.id) }}" class="btn btn-warning btn-sm">Editar</a>
+                        <button class="btn btn-danger btn-sm btn-eliminar"
+                            data-id="{{ modulo.id }}"
+                            data-url="{{ url_for('main.modulos_eliminar', id=modulo.id) }}">
+                            Eliminar
+                        </button>
+                    </td>
+                    
+                </tr>
+            {% endfor %}
+        </tbody>        
+    </table>
+    </div>
+{% else %}
+    <p class="text-center">No hay módulos escolares registrados.</p>
+{% endif %}
+
+<div class="d-flex justify-content-center mt-3">
+    <a href="{{ url_for('main.modulos_crear') }}" class="btn btn-primary">Agregar Módulo</a>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <!-- Incluir DataTables CSS y JS -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"/>
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <script>
+    $(document).ready(function(){
+      $('#tabla-escuelas').DataTable({
+          "pageLength": 10,
+          "language": {
+              "search": "Buscar:",
+              "lengthMenu": "Mostrar _MENU_ registros por página",
+              "zeroRecords": "No se encontraron registros",
+              "info": "Mostrando página _PAGE_ de _PAGES_",
+              "infoEmpty": "No hay registros disponibles",
+              "infoFiltered": "(filtrado de _MAX_ registros totales)",
+              "paginate": {
+                "first": "Primero",
+                "last": "Último",
+                "next": "Siguiente",
+                "previous": "Anterior"
+            }
+          },
+          // Configuración para colocar el filtro a la izquierda y el botón a la derecha
+          "dom": '<"top"f<"dt-add">>rt<"bottom"lp><"clear">',
+          "initComplete": function(settings, json) {
+              $("div.dt-add").html('<a href="{{ url_for("main.modulos_crear") }}" class="btn btn-primary">Agregar Módulo</a>');
+          }
+      });
+    });
+  </script>
+{% endblock %}
+
+{% block extra_css %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/datatables_custom.css') }}">
+{% endblock %}
+

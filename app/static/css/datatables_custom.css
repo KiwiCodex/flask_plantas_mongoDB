@@ -1,0 +1,36 @@
+/* Estilos para el buscador de DataTables */
+.dataTables_filter {
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+.dataTables_filter input[type="search"] {
+    width: 400px;
+    max-width: 400px;
+    font-size: 1.2em;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Espaciado e interlineado en las celdas de la tabla */
+.dataTable tbody tr td {
+    padding: 12px 8px;
+    vertical-align: middle;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Borde lateral en las celdas */
+.dataTable tbody tr td {
+    border-right: 1px solid #ddd;
+}
+.dataTable tbody tr td:last-child {
+    border-right: none;
+}
+
+/* Alinear el contenedor superior para que el filtro quede a la izquierda y el botón a la derecha */
+div.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

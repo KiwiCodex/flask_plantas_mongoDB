@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Escuela</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Estilos para la lista desplegable */
+        .dropdown-list {
+            position: absolute;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: none; /* Oculto por defecto */
+            z-index: 1000;
+        }
+        .dropdown-item {
+            padding: 8px;
+            cursor: pointer;
+        }
+        .dropdown-item:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Agregar Nueva Escuela</h2>
+
+        <!-- Mostrar mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('main.escuela_crear') }}" method="POST">
+            <!-- Campo de búsqueda con pantalla desplegable -->
+            <div class="mb-3 position-relative">
+                <label for="nombre" class="form-label">Nombre de la Escuela</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" autocomplete="off" required>
+                <div id="dropdown" class="dropdown-list"></div>
+            </div>
+
+            <!-- Coordenadas (se llenan automáticamente) -->
+            <div class="mb-3">
+                <label for="director" class="form-label">Coordenadas</label>
+                <input type="text" id="coordenadas" name="coordenadas" class="form-control" 
+                placeholder="Campo se llenará automáticamente al seleccionar el nombre de la Escuela" readonly>
+            </div>
+
+            <!-- Comuna (se llenan automáticamente) -->
+            <div class="mb-3">
+                <label for="director" class="form-label">Comuna</label>
+                <input type="text" id="comuna" name="comuna" class="form-control" 
+                placeholder="Campo se llenará automáticamente al seleccionar el nombre de la Escuela" readonly>
+            </div>
+
+            <!-- Otros datos -->
+            <div class="mb-3">
+                <label for="director" class="form-label">Director</label>
+                <input type="text" class="form-control" id="director" name="director" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="profesor" class="form-label">Profesor a Cargo</label>
+                <input type="text" class="form-control" id="profesor" name="profesor" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="curso" class="form-label">Curso</label>
+                <input type="text" class="form-control" id="curso" name="curso" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var colegios = JSON.parse('{{ COLEGIOS | tojson | safe }}');
+        var nombreInput = document.getElementById("nombre");
+        var dropdown = document.getElementById("dropdown");
+        var coordenadasInput = document.getElementById("coordenadas");
+        var comunaInput = document.getElementById("comuna");
+
+        // Función para actualizar la lista desplegable
+        function actualizarLista(filtro) {
+            dropdown.innerHTML = ""; // Limpiar opciones previas
+            var opcionesFiltradas = Object.keys(colegios).filter(colegio => colegio.toLowerCase().includes(filtro.toLowerCase()));
+
+            if (opcionesFiltradas.length === 0) {
+                dropdown.style.display = "none"; // Ocultar si no hay coincidencias
+                return;
+            }
+
+            opcionesFiltradas.forEach(colegio => {
+                var item = document.createElement("div");
+                item.classList.add("dropdown-item");
+                item.textContent = colegio;
+
+                // Al hacer clic en una opción, se selecciona automáticamente
+                item.addEventListener("click", function () {
+                    nombreInput.value = colegio;
+                    coordenadasInput.value = colegios[colegio].coordenadas; // Asigna coordenadas
+                    comunaInput.value = colegios[colegio].comuna; // Asigna comuna
+                    dropdown.style.display = "none"; // Ocultar menú
+                });
+
+                dropdown.appendChild(item);
+            });
+
+            dropdown.style.display = "block"; // Mostrar la lista
+        }
+
+        // Evento cuando el usuario escribe
+        nombreInput.addEventListener("input", function () {
+            if (this.value.length > 0) {
+                actualizarLista(this.value);
+            } else {
+                dropdown.style.display = "none"; // Ocultar si está vacío
+            }
+        });
+
+        // Ocultar el menú si se hace clic fuera
+        document.addEventListener("click", function (e) {
+            if (!nombreInput.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = "none";
+            }
+        });
+    });
+    </script>
+</body>
+</html>
