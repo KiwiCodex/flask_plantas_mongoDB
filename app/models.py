@@ -1,134 +1,209 @@
-from app import db
-from sqlalchemy.sql import func
+from flask import current_app
+from app import mongo
+from bson import ObjectId
+from datetime import datetime
 from geoalchemy2 import Geometry
 
-class Escuela(db.Model):
-    __tablename__ = 'escuelas'
-    id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(255), nullable=False)
-    comuna = db.Column(db.String(255), nullable=False)
-    director = db.Column(db.String(255), nullable=True)
-    profesor = db.Column(db.String(255), nullable=True)
-    curso = db.Column(db.String(255), nullable=True)
-    coordenadas = db.Column(Geometry('POINT'), nullable=True)
 
-    modulos = db.relationship('ModuloEscolar', backref='escuela', lazy=True)
+def get_collection(name):
+    return current_app.extensions['pymongo']['MONGO_URI'][name]
 
-class ModuloEscolar(db.Model):
-    __tablename__ = 'modulos_escolares'
-    id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(255), nullable=False)
-    ubicacion = db.Column(db.String(255), nullable=True)
-    coordenadas = db.Column(Geometry('POINT'), nullable=True)
-    
-    id_dataloger = db.Column(db.Integer, db.ForeignKey('datalogers.id'))
-    id_planta = db.Column(db.Integer, db.ForeignKey('plantas.id'))
-    id_escuela = db.Column(db.Integer, db.ForeignKey('escuelas.id'))
-    
-    dataloger = db.relationship('Dataloger', backref='modulos', lazy=True)
-    planta = db.relationship('Planta', backref='modulos', lazy=True)
+def get_collection(name):
+    return mongo.db[name]
 
-class Dataloger(db.Model):
-    __tablename__ = 'datalogers'
-    id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(255), nullable=False)
-    ip = db.Column(db.String(50), nullable=False)
-    api_token = db.Column(db.String(255), nullable=False)
-    api_url = db.Column(db.String(255), nullable=False)
-
-planta_variable = db.Table(
-    'planta_variable',
-    db.Column('id_planta', db.Integer, db.ForeignKey('plantas.id', ondelete="CASCADE"), primary_key=True),
-    db.Column('id_variable', db.Integer, db.ForeignKey('variables.id', ondelete="CASCADE"), primary_key=True)
-)
-
-class Planta(db.Model):
-    __tablename__ = 'plantas'
-
-    id = db.Column(db.Integer, primary_key=True)
-    especie = db.Column(db.String(100), nullable=False)
-    fecha_plantado = db.Column(db.Date, nullable=True)
-    fecha_cosecha = db.Column(db.Date, nullable=True)
-
-    variables = db.relationship('Variables', secondary=planta_variable, back_populates='plantas')
-    rangos = db.relationship('Rangos', backref='planta', lazy=True)
+#---------
+#Escuela
+#---------
+def crear_escuela(nombre, comuna, director, profesor, curso, coordenadas=None):
+    escuela = {
+        "nombre": nombre,
+        "comuna": comuna,
+        "director": director,
+        "profesor": profesor,
+        "curso": curso,
+        "coordenadas": {"type": "Point", "coordinates": coordenadas or [0, 0]}
+    }
+    coleccion = get_collection('escuelas')
+    return coleccion.insert_one(escuela).inserted_id
 
 
-class Variables(db.Model):
-    __tablename__ = 'variables'
-    id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(255), nullable=False)
-    unidad_medida = db.Column(db.String(50), nullable=False)
-    
-    plantas = db.relationship('Planta', secondary=planta_variable, back_populates='variables')
+def obtener_escuelas():
+    return list(get_collection('escuelas').find())
 
-class Rangos(db.Model):
-    __tablename__ = 'rangos'
-    id = db.Column(db.Integer, primary_key=True)
-    temperatura_min = db.Column(db.Float, nullable=True) 
-    temperatura_max = db.Column(db.Float, nullable=True)  
-    ph_min = db.Column(db.Float, nullable=True)  
-    ph_max = db.Column(db.Float, nullable=True)  
-    humedad_min = db.Column(db.Float, nullable=True)  
-    humedad_max = db.Column(db.Float, nullable=True)  
+def obtener_escuela_por_id(id_):
+    return get_collection('escuelas').find_one({"_id": ObjectId(id_)})
 
-    id_planta = db.Column(db.Integer, db.ForeignKey('plantas.id'))
+def actualizar_escuela(id_, nuevos_datos):
+    return get_collection('escuelas').update_one(
+        {"_id": ObjectId(id_)}, {"$set": nuevos_datos}
+    )
 
+def eliminar_escuela(id_):
+    return get_collection('escuelas').delete_one({"_id": ObjectId(id_)})
 
-class Mediciones(db.Model):
-    __tablename__ = 'mediciones'
-    id = db.Column(db.Integer, primary_key=True)
-    datetime = db.Column(db.DateTime(timezone=True), server_default=func.now())
-    value = db.Column(db.Float, nullable=False)
-    precision = db.Column(db.Float, nullable=True)
-    sensor_type = db.Column(db.String(50), nullable=True)  # Por ejemplo: 'Atmospheric Pressure'
-    mrid = db.Column(db.String(50), nullable=True)
-    error_flag = db.Column(db.Boolean, default=False)
-    error_description = db.Column(db.String(255), nullable=True)
-    
-    # Claves foráneas
-    id_dataloger = db.Column(db.Integer, db.ForeignKey('datalogers.id', ondelete="CASCADE"))
-    id_planta = db.Column(db.Integer, db.ForeignKey('plantas.id', ondelete="CASCADE"))
-    
-    # Relaciones para facilitar el acceso a los objetos relacionados
-    dataloger = db.relationship('Dataloger', backref=db.backref('mediciones', cascade="all, delete-orphan", lazy=True))
-    planta = db.relationship('Planta', backref=db.backref('mediciones', cascade="all, delete-orphan", lazy=True))
-    
-    def __repr__(self):
-        return f"<Medicion {self.sensor_type or ''} - {self.datetime} - {self.value}>"
-'''
-class ParametrosClimaticos(db.Model):
-    __tablename__ = 'parametros_climaticos'
-    id = db.Column(db.Integer, primary_key=True)
-    temperatura = db.Column(db.Float, nullable=False)
-    humedad = db.Column(db.Float, nullable=False)
-    precipitaciones = db.Column(db.Float, nullable=False)
-    radiacion_global = db.Column(db.Float, nullable=False)
-    radiacion_uv = db.Column(db.Float, nullable=False)
+def escuela_duplicada(nombre, comuna, director, profesor, coordenadas, curso):
+    escuelas = obtener_escuelas()
+    for esc in escuelas:
+        if (
+            esc["nombre"] == nombre and
+            esc["comuna"] == comuna and
+            esc["director"] == director and
+            esc["profesor"] == profesor and
+            esc.get("coordenadas", {}).get("coordinates") == coordenadas and
+            esc["curso"] == curso
+        ):
+            return True
+    return False
+
+#---------
+#Dataloger
+#---------
+def crear_dataloger(nombre, ip, api_token, api_url):
+
+    dataloger = {
+        "nombre": nombre, #Device_SN
+        "ip": ip,
+        "api_token": api_token,
+        "api_url": api_url
+    }
+
+    coleccion = get_collection('datalogers')
+    return coleccion.insert_one(dataloger).inserted_id
 
 
-class ParametrosAgua(db.Model):
-    __tablename__ = 'parametros_agua'
-    id = db.Column(db.Integer, primary_key=True)
-    ph = db.Column(db.Float, nullable=False)
-    salinidad = db.Column(db.Float, nullable=False)
-    cloruro = db.Column(db.Float, nullable=False)
-    boro = db.Column(db.Float, nullable=False)
+def obtener_datalogers():
+    return list(get_collection('datalogers').find())
+
+#---------
+#Planta
+#---------
+def crear_planta(nombre, fecha_plantado, fecha_cosecha, id_variables=None):
+    planta = {
+        "especie": nombre,
+        "fecha_plantado": fecha_plantado,
+        "fecha_cosecha": fecha_cosecha,
+        "id_variables": [ObjectId(v) for v in id_variables] if id_variables else []
+    }
+    coleccion = get_collection('plantas')
+    return coleccion.insert_one(planta).inserted_id
+
+def obtener_plantas():
+    return list(get_collection('plantas').find())
 
 
-class ParametrosSuelo(db.Model):
-    __tablename__ = 'parametros_suelo'
-    id = db.Column(db.Integer, primary_key=True)
-    humedad = db.Column(db.Float, nullable=False)
-    potencial_matrico = db.Column(db.Float, nullable=False)
-    temperatura = db.Column(db.Float, nullable=False)
-    salinidad = db.Column(db.Float, nullable=False)
+#---------
+#Variables
+#---------
+
+def crear_variable(nombre, unidad_medida):
+    variable = {
+        "nombre": nombre,
+        "unidad_medida": unidad_medida
+    }
+    mongo.db.variables.insert_one(variable)
+    return variable
+
+def obtener_variables():
+    return list(mongo.db.variables.find())
+
+def obtener_variable_por_id(variable_id):
+    return mongo.db.variables.find_one({"_id": variable_id})
+
+def actualizar_variable(variable_id, campos_actualizados):
+    return mongo.db.variables.update_one({"_id": variable_id}, {"$set": campos_actualizados})
+
+def eliminar_variable(variable_id):
+    return mongo.db.variables.delete_one({"_id": variable_id})
 
 
-//Para relacionarlos después en otra entidad//:
-clima = db.relationship('ParametrosClimaticos', backref='modulo', lazy=True)
-agua = db.relationship('ParametrosAgua', backref='modulo', lazy=True)
-suelo = db.relationship('ParametrosSuelo', backref='modulo', lazy=True)
-especie_rango = db.relationship('EspecieRangos', backref='modulo', uselist=False)
+#---------
+#Rangos
+#---------
 
-'''
+
+def crear_rango(id_planta, temperatura_min=None, temperatura_max=None, ph_min=None, ph_max=None, humedad_min=None, humedad_max=None):
+    rango = {
+        "id_planta": id_planta,
+        "temperatura_min": temperatura_min,
+        "temperatura_max": temperatura_max,
+        "ph_min": ph_min,
+        "ph_max": ph_max,
+        "humedad_min": humedad_min,
+        "humedad_max": humedad_max
+    }
+    mongo.db.rangos.insert_one(rango)
+    return rango
+
+def obtener_rangos():
+    return list(mongo.db.rangos.find())
+
+def obtener_rango_por_id(rango_id):
+    return mongo.db.rangos.find_one({"_id": rango_id})
+
+def actualizar_rango(rango_id, campos_actualizados):
+    return mongo.db.rangos.update_one({"_id": rango_id}, {"$set": campos_actualizados})
+
+def eliminar_rango(rango_id):
+    return mongo.db.rangos.delete_one({"_id": rango_id})
+
+#---------
+#Modulos
+#---------
+
+def crear_modulo_escolar(nombre, ubicacion=None, coordenadas=None, id_dataloger=None, id_planta=None, id_escuela=None):
+    modulo = {
+        "nombre": nombre,
+        "ubicacion": ubicacion,
+        "coordenadas": coordenadas,  # Ejemplo: {"type": "Point", "coordinates": [lon, lat]}
+        "id_dataloger": id_dataloger,
+        "id_planta": id_planta,
+        "id_escuela": id_escuela
+    }
+    mongo.db.modulos_escolares.insert_one(modulo)
+    return modulo
+
+def obtener_modulos_escolares():
+    return list(mongo.db.modulos_escolares.find())
+
+def obtener_modulo_por_id(modulo_id):
+    return mongo.db.modulos_escolares.find_one({"_id": modulo_id})
+
+def actualizar_modulo(modulo_id, campos_actualizados):
+    return mongo.db.modulos_escolares.update_one({"_id": modulo_id}, {"$set": campos_actualizados})
+
+def eliminar_modulo(modulo_id):
+    return mongo.db.modulos_escolares.delete_one({"_id": modulo_id})
+
+
+#---------
+#Mediciones
+#---------
+def crear_medicion(value, id_dataloger, id_planta, precision=None, sensor_type=None, mrid=None, error_flag=False, error_description=None):
+    medicion = {
+        "datetime": datetime.utcnow(),
+        "value": value,
+        "precision": precision,
+        "sensor_type": sensor_type,
+        "mrid": mrid,
+        "error_flag": error_flag,
+        "error_description": error_description,
+        "id_dataloger": id_dataloger,
+        "id_planta": id_planta
+    }
+    mongo.db.mediciones.insert_one(medicion)
+    return medicion
+
+def obtener_mediciones():
+    return list(mongo.db.mediciones.find())
+
+def obtener_medicion_por_id(medicion_id):
+    return mongo.db.mediciones.find_one({"_id": medicion_id})
+
+def obtener_mediciones_por_planta(id_planta):
+    return list(mongo.db.mediciones.find({"id_planta": id_planta}))
+
+def obtener_mediciones_por_dataloger(id_dataloger):
+    return list(mongo.db.mediciones.find({"id_dataloger": id_dataloger}))
+
+def eliminar_medicion(medicion_id):
+    return mongo.db.mediciones.delete_one({"_id": medicion_id})
