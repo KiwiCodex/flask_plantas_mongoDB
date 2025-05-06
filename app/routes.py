@@ -1,8 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, current_app, abort
-from app.models import ModuloEscolar, Planta, Rangos, Escuela, Variables, Dataloger, Mediciones
 import app.models as models
 from app.models import get_collection
-from app import db
 from geoalchemy2.shape import from_shape
 from shapely.geometry import Point
 from .api_client import obtener_datos
@@ -16,10 +14,18 @@ from colegios import COLEGIOS
 import random
 import requests
 import json
+from . import mongo
+
+
+def get_collection(collection_name):
+    return mongo.db[collection_name]
+
 
 # Define el blueprint
 main = Blueprint('main', __name__)
-plantas_collection = models.get_collection('plantas')
+
+
+plantas_collection = get_collection('plantas')
 datalogers_collection = get_collection('datalogers')
 variables_collection = get_collection('variables')
 

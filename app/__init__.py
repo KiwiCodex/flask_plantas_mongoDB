@@ -1,19 +1,20 @@
 # app/__init__.py
 from flask import Flask
-from flask_pymongo import PyMongo
-from dotenv import load_dotenv
-import os
+from pymongo import MongoClient
+from config import Config
 
-load_dotenv()
-
-mongo = PyMongo()
+mongo = None  # Variable global para compartir la conexión
 
 def create_app():
+    global mongo
     app = Flask(__name__)
-    app.config["MONGO_URI"] = os.getenv("MONGO_URI")
-    mongo.init_app(app)
+    app.config.from_object(Config)
 
-    from .routes import main
-    app.register_blueprint(main)
+    # Conexión a MongoDB
+    client = MongoClient(app.config["MONGO_URI"])
+    mongo = client["huertosdb"]  # Acceso directo
+
+    from .routes import main as main_blueprint
+    app.register_blueprint(main_blueprint)
 
     return app
