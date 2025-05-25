@@ -10,6 +10,10 @@ Clona el repositorio
 git clone https://github.com/KiwiCodex/flask_plantas_mongoDB
 cd flask_plantas_mongoDB
 ```
+Iniciar MongoDB
+```
+net start MongoDB
+```
 Crea entorno virtual
 ```
 python -m venv venv
