@@ -10,9 +10,9 @@ Clona el repositorio
 git clone https://github.com/KiwiCodex/flask_plantas_mongoDB
 cd flask_plantas_mongoDB
 ```
-Iniciar MongoDB
+Iniciar MongoDB (CMD en Administrador)
 ```
-net start MongoDB
+net start MongoDB #Windows
 ```
 Crea entorno virtual
 ```
