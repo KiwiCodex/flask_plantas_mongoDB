@@ -29,19 +29,18 @@
           <td>{{ planta.fecha_plantado or 'No especificado' }}</td>
           <td>{{ planta.fecha_cosecha or 'No especificado' }}</td>
           <td>
-            {% if planta.rangos %}
-              <ul class="list-unstyled">
-                {% for rango in planta.rangos %}
-                  <li>
-                    <p><span style="font-weight:bold">Temperatura</span>: {{ rango.temperatura_min }}°C - {{ rango.temperatura_max }}°C</p>
-                    <p><span style="font-weight:bold">pH</span>: {{ rango.ph_min }} - {{ rango.ph_max }}</p>
-                    <p><span style="font-weight:bold">Humedad</span>: {{ rango.humedad_min }}% - {{ rango.humedad_max }}%</p>
-                  </li>
-                {% endfor %}
-              </ul>
-            {% else %}
-              <span class="text-muted">No hay rangos registrados</span>
-            {% endif %}
+        {% if planta.rangos %}
+          <ul class="list-unstyled">
+            <li>
+              <p><strong>Temperatura</strong>: {{ planta.rangos.temperatura_min }}°C - {{ planta.rangos.temperatura_max }}°C</p>
+              <p><strong>pH</strong>: {{ planta.rangos.ph_min }} - {{ planta.rangos.ph_max }}</p>
+              <p><strong>Humedad</strong>: {{ planta.rangos.humedad_min }}% - {{ planta.rangos.humedad_max }}%</p>
+            </li>
+          </ul>
+        {% else %}
+          <span class="text-muted">No hay rangos registrados</span>
+        {% endif %}
+
           </td>
           <td>
             <a href="{{ url_for('main.plantas_editar', id=planta.id) }}" class="btn btn-info btn-sm">Editar</a>
