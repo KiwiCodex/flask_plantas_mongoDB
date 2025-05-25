@@ -12,7 +12,7 @@
             <select class="form-control" id="dataloger" name="dataloger" required>
                 <option value="" selected disabled>Seleccione un Dataloger</option>
                 {% for dataloger in datalogers %}
-                    <option value="{{ dataloger.id }}">{{ dataloger.nombre }}</option>
+                    <option value="{{ dataloger._id }}">{{ dataloger.nombre }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -21,7 +21,7 @@
             <select class="form-control" id="planta" name="planta" required>
                 <option value="" selected disabled>Seleccione una Planta</option>
                 {% for planta in plantas %}
-                    <option value="{{ planta.id }}">{{ planta.especie }}</option>
+                    <option value="{{ planta._id }}">{{ planta.especie }}</option>
                 {% endfor %}
             </select>
         </div>

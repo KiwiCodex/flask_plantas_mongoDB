@@ -729,6 +729,21 @@ def mediciones_descargar():
         planta_id = request.form['planta']
         start_date_input = request.form.get("start_date")
         end_date_input = request.form.get("end_date")
+
+        try:
+            dataloger = datalogers_col.find_one({"_id": ObjectId(dataloger_id)})
+            if not dataloger:
+                raise InvalidId("Dataloger no encontrado")
+        except InvalidId:
+            flash("ID de Dataloger inválido.", "danger")
+            return redirect(url_for("main.mediciones_descargar"))
+
+        try:
+            planta_obj_id = ObjectId(planta_id)
+        except InvalidId:
+            flash("ID de Planta inválido.", "danger")
+            return redirect(url_for("main.mediciones_descargar"))
+
         start_date = start_date_input.replace("T", " ") + ":00" if start_date_input else "2025-02-11 00:00:00"
         end_date = end_date_input.replace("T", " ") + ":00" if end_date_input else "2025-03-20 01:00:00"
 
@@ -776,8 +791,14 @@ def mediciones_descargar():
                     mediciones_col.insert_one(medicion)
                     count += 1
             flash(f"{count} mediciones descargadas y guardadas correctamente.", "success")
+
+        elif response.status_code == 429:
+            retry_after = response.headers.get("Retry-After", "unos minutos")
+            flash(f"Has superado el límite de solicitudes. Intenta nuevamente después de {retry_after}.", "warning")
+
         else:
             flash(f"Error al obtener datos de la API: {response.status_code}", "danger")
+
 
         return redirect(url_for("main.mediciones_lista"))
 
