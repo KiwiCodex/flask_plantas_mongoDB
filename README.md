@@ -7,8 +7,8 @@ Requisitos:
 
 Clona el repositorio
 ```
-git clone https://github.com/usuario/mi_proyecto_flask_mongo.git
-cd mi_proyecto_flask_mongo
+git clone https://github.com/KiwiCodex/flask_plantas_mongoDB
+cd flask_plantas_mongoDB
 ```
 Crea entorno virtual
 ```
