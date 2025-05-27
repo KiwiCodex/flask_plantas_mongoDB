@@ -617,6 +617,9 @@ def variables_eliminar(id):
 @main.route('/datalogers', methods=['GET'])
 def datalogers_lista():
     datalogers = list(datalogers_collection.find())
+    for d in datalogers:
+        d['_id'] = str(d['_id'])
+
     return render_template('datalogers_lista.html', datalogers=datalogers)
 
 
@@ -670,7 +673,7 @@ def datalogers_editar(id):
         flash(f"Dataloger <b>{nuevos_datos['nombre']}</b> actualizado correctamente", "success")
         return redirect(url_for('main.datalogers_lista'))
 
-    return render_template('datalogers_editar.html', dataloger=datalogger)
+    return render_template('datalogers_editar.html', datalogger=datalogger)
 
 
 # ----------- ELIMINAR DATALOGER -----------

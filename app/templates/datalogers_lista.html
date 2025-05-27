@@ -17,19 +17,20 @@
         </tr>
       </thead>
       <tbody>
-        {% for dataloger in datalogers %}
+      {% for datalogger in datalogers %}
         <tr>
-          <td>{{ dataloger.nombre }}</td>
-          <td>{{ dataloger.ip }}</td>
-          <td>{{ dataloger.api_url }}</td>
+          <td>{{ datalogger.nombre }}</td>
+          <td>{{ datalogger.ip }}</td>
+          <td>{{ datalogger.api_url }}</td>
           <td>
-            <a href="{{ url_for('main.datalogers_editar', id=dataloger.id) }}" class="btn btn-info btn-sm">Editar</a>
+          <a href="{{ url_for('main.datalogers_editar', id=datalogger._id) }}" class="btn btn-info btn-sm">Editar</a>
             <button class="btn btn-danger btn-sm btn-eliminar"
-                    data-id="{{ dataloger.id }}"
-                    data-url="{{ url_for('main.datalogers_eliminar', id=dataloger.id) }}">
+                    data-id="{{ datalogger._id }}"
+                    data-url="{{ url_for('main.datalogers_eliminar', id=datalogger._id) }}">
               Eliminar
             </button>
           </td>
+
         </tr>
         {% endfor %}
       </tbody>
