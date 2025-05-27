@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: flask-plantas-mongoDB
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn run:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_APP
+        value: run.py
+      - key: SECRET_KEY
+        value: 6032cf6f4adb03d5bb2d5066ecd356c3
+      - key: MONGO_URI
+        value: mongodb+srv://seph:sephdb@cluster0.lfi0ywv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+    plan: free
+    region: oregon
+    routes:
+      - type: http
+        path: /
