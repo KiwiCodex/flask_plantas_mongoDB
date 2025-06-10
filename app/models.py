@@ -2,7 +2,6 @@ from flask import current_app
 from app import mongo
 from bson import ObjectId
 from datetime import datetime
-from geoalchemy2 import Geometry
 
 
 def get_collection(name):
