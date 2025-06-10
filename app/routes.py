@@ -1,10 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, current_app, abort
 import app.models as models
 from app.models import get_collection
-from geoalchemy2.shape import from_shape
-from shapely.geometry import Point
 from .api_client import obtener_datos
-from sqlalchemy import func
 from datetime import datetime
 from dateutil import parser
 from bson import ObjectId
